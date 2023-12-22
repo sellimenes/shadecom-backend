@@ -34,5 +34,7 @@ func main () {
 	r.PUT("/api/category/:id", controllers.CategoryUpdate)
 	r.DELETE("/api/category/:id", controllers.CategoryDelete)
 
+	r.POST("/api/role", controllers.RoleCreate)
+
 	r.Run()
 }
