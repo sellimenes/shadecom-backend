@@ -53,7 +53,18 @@ func CategoryCreate(c *gin.Context){
 	result := initializers.DB.Create(&category)
 
 	if result.Error != nil {
-		c.Status(400)
+		// If the error is due to a duplicate slug
+		if strings.Contains(result.Error.Error(), "duplicate") && strings.Contains(result.Error.Error(), "slug") {
+			c.JSON(400, gin.H{
+				"error": "A category with this slug already exists",
+			})
+			return
+		}
+
+		// If the error is due to another reason
+		c.JSON(500, gin.H{
+			"error": "An error occurred while creating the category",
+		})
 		return
 	}
 
