@@ -4,18 +4,18 @@ import "gorm.io/gorm"
 
 type Settings struct {
 	gorm.Model
-	websiteName 			string
-	websiteDescription 		string
-	websiteLogo 			string
-	websiteFavicon 			string
-	websiteKeywords 		string
-	websiteEmail 			string
-	websitePhone 			string `gorm:"nullable"`
-	websiteAddress 			string `gorm:"nullable"`
-	websiteFacebook 		string `gorm:"nullable"`
-	websiteX 				string `gorm:"nullable"`
-	websiteInstagram 		string `gorm:"nullable"`
-	websiteLinkedin 		string `gorm:"nullable"`
-	websiteYoutube 			string `gorm:"nullable"`
-	websiteGoogleAnalytics 	string `gorm:"nullable"`
+	WebsiteName 			string
+	WebsiteDescription 		string
+	WebsiteLogo 			string
+	WebsiteFavicon 			string
+	WebsiteKeywords 		string
+	WebsiteEmail 			string
+	WebsitePhone 			string `gorm:"nullable"`
+	WebsiteAddress 			string `gorm:"nullable"`
+	WebsiteFacebook 		string `gorm:"nullable"`
+	WebsiteX 				string `gorm:"nullable"`
+	WebsiteInstagram 		string `gorm:"nullable"`
+	WebsiteLinkedin 		string `gorm:"nullable"`
+	WebsiteYoutube 			string `gorm:"nullable"`
+	WebsiteGoogleAnalytics 	string `gorm:"nullable"`
 }

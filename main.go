@@ -36,5 +36,8 @@ func main () {
 
 	r.POST("/api/role", controllers.RoleCreate)
 
+	r.PUT("/api/settings", controllers.SettingsUpdate)
+	r.GET("/api/settings", controllers.SettingsGet)
+
 	r.Run()
 }
