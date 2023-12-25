@@ -16,7 +16,7 @@ func main () {
 	r := gin.Default()
 
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:3000", "http://localhost:8080"}
+	config.AllowOrigins = []string{"http://localhost:3000", "http://localhost:8080", "https://shadecom.vercel.app"}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE"}
 	config.AllowHeaders = []string{"Origin", "Content-Type"}
 
