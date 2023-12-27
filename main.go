@@ -39,5 +39,7 @@ func main () {
 	r.PUT("/api/settings", controllers.SettingsUpdate)
 	r.GET("/api/settings", controllers.SettingsGet)
 
+	r.POST("/api/upload", controllers.UploadImage)
+
 	r.Run()
 }
