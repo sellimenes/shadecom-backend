@@ -40,6 +40,7 @@ func main () {
 	r.GET("/api/settings", controllers.SettingsGet)
 
 	r.POST("/api/upload", controllers.UploadImage)
+	r.POST("/api/uploads", controllers.UploadImages)
 
 	r.Run()
 }
