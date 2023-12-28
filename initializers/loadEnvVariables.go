@@ -14,6 +14,7 @@ func LoadEnvVariables() {
 		panic(err)
 	}
 	envPath := filepath.Join(filepath.Dir(ex), ".env")	
+	// fmt.Println(envPath)
 
 	if _, exists := os.LookupEnv("RAILWAY_ENVIRONMENT"); !exists {
 		err = godotenv.Load(envPath)

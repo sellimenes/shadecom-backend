@@ -16,4 +16,5 @@ func main() {
 	initializers.DB.AutoMigrate(&models.User{})
 	initializers.DB.AutoMigrate(&models.Settings{})
 	initializers.DB.AutoMigrate(&models.Role{})
+	initializers.DB.AutoMigrate(&models.Product{})
 }

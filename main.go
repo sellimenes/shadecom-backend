@@ -42,5 +42,7 @@ func main () {
 
 	r.POST("/api/upload", controllers.UploadImages)
 
+	r.POST("/api/product", controllers.ProductCreate)
+
 	r.Run()
 }
