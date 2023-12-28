@@ -24,7 +24,7 @@ func ProductCreate(c *gin.Context) {
 	c.Bind(&body)
 
 	// Create slug
-	slug := CreateSlug(body.Name)
+	slug := createSlug(body.Name)
 	
 	// Create product
 	product := models.Product{

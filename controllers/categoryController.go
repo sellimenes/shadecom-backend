@@ -10,7 +10,7 @@ import (
 )
 
 // Slug create function
-func CreateSlug(name string) string {
+func createSlug(name string) string {
     slug := strings.ToLower(name)
     slug = strings.ReplaceAll(slug, " ", "-")
 
@@ -46,7 +46,7 @@ func CategoryCreate(c *gin.Context){
 
 	c.Bind(&body)
 
-	slug := CreateSlug(body.Name)
+	slug := createSlug(body.Name)
 
 	// Create a category
 	category := models.Category{Name: body.Name, Slug: slug}
