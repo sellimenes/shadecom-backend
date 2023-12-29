@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +16,7 @@ func ProductCreate(c *gin.Context) {
 		Description 	string
 		Price 			float64
 		Stock 			int
+		Images 			[]string
 		CategoryID 		int
 		IsActive 		bool
 		IsSale 			bool
@@ -25,6 +28,12 @@ func ProductCreate(c *gin.Context) {
 
 	// Create slug
 	slug := createSlug(body.Name)
+
+	// Convert Images to json.RawMessage
+	imagesJSON, err := json.Marshal(body.Images)
+	if err != nil {
+		fmt.Println(err)
+	}
 	
 	// Create product
 	product := models.Product{
@@ -33,6 +42,7 @@ func ProductCreate(c *gin.Context) {
 		Description: body.Description,
 		Price: body.Price,
 		Stock: body.Stock,
+		Images: imagesJSON,
 		CategoryID: body.CategoryID,
 		IsActive: body.IsActive,
 		IsSale: body.IsSale,
@@ -52,7 +62,7 @@ func ProductCreate(c *gin.Context) {
 
 		// If the error is due to another reason
 		c.JSON(500, gin.H{
-			"error": "An error occurred while creating the category",
+			"error": "An error occurred while creating the product.",
 		})
 		return
 	}
