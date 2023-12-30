@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"log"
+	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -12,41 +13,44 @@ import (
 )
 
 func UploadImages(c *gin.Context) {
-	form, _ := c.MultipartForm()
-	files := form.File["files[]"]
+    form, err := c.MultipartForm()
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get multipart form"})
+        return
+    }
 
-	for _, file := range files {
-		// Dosyayı aç
-		f, err := file.Open()
-		if err != nil {
-			log.Printf("failed to open file %q, %v", file.Filename, err)
-			continue
-		}
+    files := form.File["files[]"]
 
-		// Dosyayı yükle
-		cfg, err := config.LoadDefaultConfig(context.TODO())
-		if err != nil {
-			log.Printf("error: %v", err)
-			continue
-		}
+    cfg, err := config.LoadDefaultConfig(context.TODO())
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load AWS config"})
+        return
+    }
 
-		client := s3.NewFromConfig(cfg)
-		uploader := manager.NewUploader(client)
+    client := s3.NewFromConfig(cfg)
+    uploader := manager.NewUploader(client)
 
-		result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
-			Bucket: aws.String("shadecom"),
-			Key:    aws.String(file.Filename),
-			Body:   f,
-			ACL:    "public-read",
-		})
+    for _, file := range files {
+        f, err := file.Open()
+        if err != nil {
+            log.Printf("failed to open file %q, %v", file.Filename, err)
+            continue
+        }
 
-		if err != nil {
-			log.Printf("failed to upload file, %v", err)
-			continue
-		}
+        _, err = uploader.Upload(context.TODO(), &s3.PutObjectInput{
+            Bucket: aws.String("shadecom"),
+            Key:    aws.String(file.Filename),
+            Body:   f,
+            ACL:    "public-read",
+        })
 
-		c.JSON(200, gin.H{
-			"result": result,
-		})
-	}
+        if err != nil {
+            log.Printf("failed to upload file, %v", err)
+            continue
+        }
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "message": "Files uploaded successfully",
+    })
 }

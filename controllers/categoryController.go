@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"net/http"
 	"regexp"
 	"strings"
 
@@ -9,30 +10,25 @@ import (
 	"github.com/sellimenes/shadecom-backend/models"
 )
 
-// Slug create function
+var trToEn = map[string]string{
+    "ğ": "g",
+    "ı": "i",
+    "ö": "o",
+    "ü": "u",
+    "ç": "c",
+    "ş": "s",
+}
+
+var reg = regexp.MustCompile("[^a-zA-Z0-9-]+")
+
 func createSlug(name string) string {
     slug := strings.ToLower(name)
     slug = strings.ReplaceAll(slug, " ", "-")
-
-    // Turkish characters to English
-    trToEn := map[string]string{
-        "ğ": "g",
-        "ı": "i",
-        "ö": "o",
-        "ü": "u",
-        "ç": "c",
-        "ş": "s",
-    }
 
     for old, new := range trToEn {
         slug = strings.ReplaceAll(slug, old, new)
     }
 
-    // Only English characters, numbers and dashes
-    reg, err := regexp.Compile("[^a-zA-Z0-9-]+")
-    if err != nil {
-        panic(err)
-    }
     slug = reg.ReplaceAllString(slug, "")
 
     return slug
@@ -44,7 +40,12 @@ func CategoryCreate(c *gin.Context){
 		Name string
 	}
 
-	c.Bind(&body)
+	if err := c.ShouldBind(&body); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "Invalid request body",
+        })
+        return
+    }
 
 	slug := createSlug(body.Name)
 
@@ -77,7 +78,15 @@ func CategoryCreate(c *gin.Context){
 func CategoryIndex(c *gin.Context){
 	// Get all categories
 	var categories []models.Category
-	initializers.DB.Find(&categories)
+	result := initializers.DB.Find(&categories)
+
+	// Handle potential database errors
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "An error occurred while fetching categories",
+		})
+		return
+	}
 
 	// Return all categories
 	c.JSON(200, gin.H{
@@ -86,27 +95,48 @@ func CategoryIndex(c *gin.Context){
 }
 
 func CategoryShow(c *gin.Context){
-	// Get category by id
-	var category models.Category
-	initializers.DB.First(&category, c.Param("id"))
+    // Get category by id
+    var category models.Category
+    result := initializers.DB.First(&category, c.Param("id"))
 
-	// Return category
-	c.JSON(200, gin.H{
-		"category": category,
-	})
+    // Handle potential database errors
+    if result.Error != nil {
+        c.JSON(http.StatusNotFound, gin.H{
+            "error": "Category not found",
+        })
+        return
+    }
+
+    // Return category
+    c.JSON(http.StatusOK, gin.H{
+        "category": category,
+    })
 }
 
 func CategoryUpdate(c *gin.Context){
 	// Get category by id
 	var category models.Category
-	initializers.DB.First(&category, c.Param("id"))
+	result := initializers.DB.First(&category, c.Param("id"))
+
+    // Handle potential database errors
+    if result.Error != nil {
+        c.JSON(http.StatusNotFound, gin.H{
+            "error": "Category not found",
+        })
+        return
+    }
 
 	// Get data off req body
 	var body struct {
 		Name string
 	}
 
-	c.Bind(&body)
+	if err := c.ShouldBind(&body); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "Invalid request body",
+        })
+        return
+    }
 
 	slug := createSlug(body.Name)
 
@@ -114,12 +144,15 @@ func CategoryUpdate(c *gin.Context){
 	// Update category
 	category.Name = body.Name
 	category.Slug = slug
-	result := initializers.DB.Save(&category)
+	result = initializers.DB.Save(&category)
 
-	if result.Error != nil {
-		c.Status(400)
-		return
-	}
+    // Handle potential database errors
+    if result.Error != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "An error occurred while updating the category",
+        })
+        return
+    }
 
 	// Return category
 	c.JSON(200, gin.H{
@@ -128,20 +161,30 @@ func CategoryUpdate(c *gin.Context){
 }
 
 func CategoryDelete(c *gin.Context){
-	// Get category by id
-	var category models.Category
-	initializers.DB.First(&category, c.Param("id"))
+    // Get category by id
+    var category models.Category
+    result := initializers.DB.First(&category, c.Param("id"))
 
-	// Delete category
-	result := initializers.DB.Delete(&category)
+    // Handle potential database errors
+    if result.Error != nil {
+        c.JSON(http.StatusNotFound, gin.H{
+            "error": "Category not found",
+        })
+        return
+    }
 
-	if result.Error != nil {
-		c.Status(400)
-		return
-	}
+    // Delete category
+    result = initializers.DB.Delete(&category)
 
-	// Return category
-	c.JSON(200, gin.H{
-		"category": category,
-	})
+    if result.Error != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "An error occurred while deleting the category",
+        })
+        return
+    }
+
+    // Return category
+    c.JSON(http.StatusOK, gin.H{
+        "category": category,
+    })
 }

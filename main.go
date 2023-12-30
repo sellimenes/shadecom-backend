@@ -21,12 +21,6 @@ func main () {
 	config.AllowHeaders = []string{"Origin", "Content-Type"}
 
 	r.Use(cors.New(config))
-	
-	r.POST("/posts", controllers.PostCreate)
-	r.GET("/posts", controllers.PostIndex)
-	r.GET("/posts/:id", controllers.PostShow)
-	r.PUT("/posts/:id", controllers.PostUpdate)
-	r.DELETE("/posts/:id", controllers.PostDelete)
 
 	r.POST("/api/category", controllers.CategoryCreate)
 	r.GET("/api/category", controllers.CategoryIndex)

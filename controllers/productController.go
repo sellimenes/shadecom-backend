@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -24,16 +24,24 @@ func ProductCreate(c *gin.Context) {
 		SaleProcent 	int
 	}
 
-	c.Bind(&body)
+    if err := c.ShouldBind(&body); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "Invalid request body",
+        })
+        return
+    }
 
 	// Create slug
 	slug := createSlug(body.Name)
 
 	// Convert Images to json.RawMessage
-	imagesJSON, err := json.Marshal(body.Images)
-	if err != nil {
-		fmt.Println(err)
-	}
+    imagesJSON, err := json.Marshal(body.Images)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error": "An error occurred while processing the images",
+        })
+        return
+    }
 	
 	// Create product
 	product := models.Product{
@@ -51,21 +59,21 @@ func ProductCreate(c *gin.Context) {
 	}
 	result := initializers.DB.Create(&product)
 
-	if result.Error != nil {
-		// If the error is due to a duplicate slug
-		if strings.Contains(result.Error.Error(), "duplicate") && strings.Contains(result.Error.Error(), "slug") {
-			c.JSON(400, gin.H{
-				"error": "A category with this slug already exists",
-			})
-			return
-		}
+    if result.Error != nil {
+        // If the error is due to a duplicate slug
+        if strings.Contains(result.Error.Error(), "duplicate") && strings.Contains(result.Error.Error(), "slug") {
+            c.JSON(http.StatusBadRequest, gin.H{
+                "error": "A product with this slug already exists",
+            })
+            return
+        }
 
-		// If the error is due to another reason
-		c.JSON(500, gin.H{
-			"error": "An error occurred while creating the product.",
-		})
-		return
-	}
+        // If the error is due to another reason
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error": "An error occurred while creating the product",
+        })
+        return
+    }
 
 	// Return product
 	c.JSON(200, gin.H{
