@@ -17,6 +17,7 @@ func ProductCreate(c *gin.Context) {
 		Price 			float64
 		Stock 			int
 		Images 			[]string
+		CoverImage 		string
 		CategoryID 		int
 		IsActive 		bool
 		IsSale 			bool
@@ -51,6 +52,7 @@ func ProductCreate(c *gin.Context) {
 		Price: body.Price,
 		Stock: body.Stock,
 		Images: imagesJSON,
+		CoverImage: body.CoverImage,
 		CategoryID: body.CategoryID,
 		IsActive: body.IsActive,
 		IsSale: body.IsSale,
