@@ -78,7 +78,7 @@ func CategoryCreate(c *gin.Context){
 func CategoryIndex(c *gin.Context){
 	// Get all categories
 	var categories []models.Category
-	result := initializers.DB.Find(&categories)
+	result := initializers.DB.Find(&categories).Order("name asc")
 
 	// Handle potential database errors
 	if result.Error != nil {
