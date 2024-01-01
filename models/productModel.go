@@ -14,6 +14,7 @@ type Product struct{
 	Price 			float64
 	Stock 			int
 	Images      	json.RawMessage `gorm:"type:json"`
+	CoverImage 		string
 	CategoryID 		int
 	Category 		Category
 	IsActive 		bool			`gorm:"default:true"`
