@@ -100,7 +100,7 @@ func ProductGetAll(c *gin.Context) {
         db = db.Limit(limitValue)
     }
 
-    result := db.Find(&products)
+    result := db.Preload("Category").Find(&products)
 
     if result.Error != nil {
         c.JSON(http.StatusInternalServerError, gin.H{
