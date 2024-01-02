@@ -86,6 +86,7 @@ func ProductCreate(c *gin.Context) {
 
 func ProductGetAll(c *gin.Context) {
     var products []models.Product
+    db := initializers.DB
 
     // Get limit from query parameters, if provided
     if limit, ok := c.GetQuery("limit"); ok {
@@ -96,10 +97,10 @@ func ProductGetAll(c *gin.Context) {
             })
             return
         }
-        initializers.DB = initializers.DB.Limit(limitValue)
+        db = db.Limit(limitValue)
     }
 
-    result := initializers.DB.Find(&products)
+    result := db.Find(&products)
 
     if result.Error != nil {
         c.JSON(http.StatusInternalServerError, gin.H{
