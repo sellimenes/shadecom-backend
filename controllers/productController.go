@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -81,4 +82,34 @@ func ProductCreate(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"product": product,
 	})
+}
+
+func ProductGetAll(c *gin.Context) {
+    var products []models.Product
+
+    // Get limit from query parameters, if provided
+    if limit, ok := c.GetQuery("limit"); ok {
+        limitValue, err := strconv.Atoi(limit)
+        if err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{
+                "error": "Invalid limit value",
+            })
+            return
+        }
+        initializers.DB = initializers.DB.Limit(limitValue)
+    }
+
+    result := initializers.DB.Find(&products)
+
+    if result.Error != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error": "An error occurred while fetching the products",
+        })
+        return
+    }
+
+    // Return products
+    c.JSON(200, gin.H{
+        "products": products,
+    })
 }
