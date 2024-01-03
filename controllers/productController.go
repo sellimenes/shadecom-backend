@@ -114,3 +114,22 @@ func ProductGetAll(c *gin.Context) {
         "products": products,
     })
 }
+
+func ProductGetSingle(c *gin.Context) {
+    var product models.Product
+    slug := c.Param("slug")
+
+    result := initializers.DB.Preload("Category").Where("slug = ?", slug).First(&product)
+
+    if result.Error != nil {
+        c.JSON(http.StatusNotFound, gin.H{
+            "error": "Product not found",
+        })
+        return
+    }
+
+    // Return product
+    c.JSON(200, gin.H{
+        "product": product,
+    })
+}

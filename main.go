@@ -38,6 +38,7 @@ func main () {
 
 	r.POST("/api/product", controllers.ProductCreate)
 	r.GET("/api/products", controllers.ProductGetAll)
+	r.GET("/api/product/:slug", controllers.ProductGetSingle)
 
 	r.Run()
 }
