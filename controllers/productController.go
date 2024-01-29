@@ -19,7 +19,7 @@ func ProductCreate(c *gin.Context) {
 		Stock 			int
 		Images 			[]string
 		CoverImage 		string
-		CategoryID 		int
+		CategoryID 		uint
 		IsActive 		bool
 		IsSale 			bool
 		IsFeatured 		bool
