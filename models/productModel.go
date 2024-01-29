@@ -15,10 +15,10 @@ type Product struct{
 	Stock 			int
 	Images      	json.RawMessage `gorm:"type:json"`
 	CoverImage 		string
-	CategoryID 		int
-	Category 		Category
 	IsActive 		bool			`gorm:"default:true"`
 	IsSale 			bool			`gorm:"default:false"`
 	IsFeatured 		bool			`gorm:"default:false"`
 	SaleProcent 	int				`gorm:"default:0"`
+	CategoryID 		int
+	Category 		Category `gorm:"foreignKey:CategoryID"`
 }
