@@ -17,7 +17,7 @@ import (
 var jwtKey = []byte("your_secret_key")
 
 func CreateUser(c *gin.Context) {
-    //   Get data off req body
+    // Get data off req body
     var body struct {
         Name     string
         Email    string
@@ -31,6 +31,14 @@ func CreateUser(c *gin.Context) {
         return
     }
 
+    // Check if name, email and password are provided
+    if body.Name == "" || body.Email == "" || body.Password == "" {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "Name, email and password are required",
+        })
+        return
+    }
+
     // Hash the password
     hashedPassword, err := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
     if err != nil {
@@ -40,7 +48,7 @@ func CreateUser(c *gin.Context) {
         return
     }
 
-    //   Create a user
+    // Create a user
     user := models.User{Name: body.Name, Email: body.Email, Password: string(hashedPassword)}
     result := initializers.DB.Create(&user)
 
