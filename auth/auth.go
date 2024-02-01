@@ -19,9 +19,9 @@ var jwtKey = []byte("your_secret_key")
 func CreateUser(c *gin.Context) {
     // Get data off req body
     var body struct {
-        Name     string
-        Email    string
-        Password string
+        Name     string `json:"Name"`
+        Email    string `json:"Email"`
+        Password string `json:"Password"`
     }
 
     if err := c.ShouldBind(&body); err != nil {
