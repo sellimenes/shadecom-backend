@@ -4,11 +4,16 @@ import (
 	"net/http"
 	"strings"
 
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/sellimenes/shadecom-backend/initializers"
 	"github.com/sellimenes/shadecom-backend/models"
 	"golang.org/x/crypto/bcrypt"
 )
+
+var jwtKey = []byte("your_secret_key")
 
 func CreateUser(c *gin.Context) {
     //   Get data off req body
@@ -53,6 +58,100 @@ func CreateUser(c *gin.Context) {
         return
     }
 
+    c.JSON(http.StatusOK, gin.H{
+        "user": user,
+    })
+}
+
+func LoginUser(c *gin.Context) {
+    // Get data from request body
+    var body struct {
+        Email    string
+        Password string
+    }
+
+    if err := c.ShouldBind(&body); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "Invalid request body",
+        })
+        return
+    }
+
+    // Find user by email
+    var user models.User
+    if err := initializers.DB.Where("email = ?", body.Email).First(&user).Error; err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "Email or password is incorrect",
+        })
+        return
+    }
+
+    // Check password
+    if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password)); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "Email or password is incorrect",
+        })
+        return
+    }
+
+    // User is authenticated, create JWT token
+    expirationTime := time.Now().Add(24 * time.Hour * 7)
+    claims := &jwt.StandardClaims{
+        Subject:   user.Email,
+        ExpiresAt: expirationTime.Unix(),
+    }
+
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    tokenString, err := token.SignedString(jwtKey)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error": "Could not generate token",
+        })
+        return
+    }
+
+    // Return the token
+    c.JSON(http.StatusOK, gin.H{
+        "token": tokenString,
+    })
+}
+
+func GetCurrentUser(c *gin.Context) {
+    // Get token from Authorization header
+    authHeader := c.GetHeader("Authorization")
+    tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+    // Parse the token
+    token, err := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+        return jwtKey, nil
+    })
+
+    if err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{
+            "error": "Invalid or expired token",
+        })
+        return
+    }
+
+    // Get the user's email from the token
+    claims, ok := token.Claims.(*jwt.StandardClaims)
+    if !ok || !token.Valid {
+        c.JSON(http.StatusUnauthorized, gin.H{
+            "error": "Invalid or expired token",
+        })
+        return
+    }
+
+    // Find the user by email
+    var user models.User
+    if err := initializers.DB.Where("email = ?", claims.Subject).First(&user).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{
+            "error": "User not found",
+        })
+        return
+    }
+
+    // Return the user's information
     c.JSON(http.StatusOK, gin.H{
         "user": user,
     })

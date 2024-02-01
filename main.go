@@ -31,6 +31,8 @@ func main () {
 
 	r.POST("/api/role", controllers.RoleCreate)
 	r.POST("/api/register", auth.CreateUser)
+	r.POST("/api/login", auth.LoginUser)
+	r.GET("/api/me", auth.GetCurrentUser)
 
 	r.PUT("/api/settings", controllers.SettingsUpdate)
 	r.GET("/api/settings", controllers.SettingsGet)
