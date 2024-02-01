@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/sellimenes/shadecom-backend/auth"
 	"github.com/sellimenes/shadecom-backend/controllers"
 	"github.com/sellimenes/shadecom-backend/initializers"
 )
@@ -29,6 +30,7 @@ func main () {
 	r.DELETE("/api/category/:id", controllers.CategoryDelete)
 
 	r.POST("/api/role", controllers.RoleCreate)
+	r.POST("/api/register", auth.CreateUser)
 
 	r.PUT("/api/settings", controllers.SettingsUpdate)
 	r.GET("/api/settings", controllers.SettingsGet)
