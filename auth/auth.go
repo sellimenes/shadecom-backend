@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
@@ -80,6 +81,7 @@ func LoginUser(c *gin.Context) {
     // Find user by email
     var user models.User
     if err := initializers.DB.Where("email = ?", body.Email).First(&user).Error; err != nil {
+        log.Println(err) // Log the actual error message
         c.JSON(http.StatusBadRequest, gin.H{
             "error": "Email or password is incorrect",
         })
