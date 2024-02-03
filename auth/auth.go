@@ -14,6 +14,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type UserClaims struct {
+    Name  string
+    Email string
+    Phone string
+    Address string
+    RoleID uint
+}
+
+type CustomClaims struct {
+    User *UserClaims
+    jwt.StandardClaims
+}
+
 var jwtKey = []byte("your_secret_key")
 
 func CreateUser(c *gin.Context) {
@@ -104,11 +117,23 @@ func LoginUser(c *gin.Context) {
         return
     }
 
+    // Create a new UserClaims object from the user
+    userClaims := &UserClaims{
+    Name:  user.Name,
+    Email: user.Email,
+    Phone: user.Phone,
+    Address: user.Address,
+    RoleID: user.RoleID,
+}
+
     // User is authenticated, create JWT token
     expirationTime := time.Now().Add(24 * time.Hour * 7)
-    claims := &jwt.StandardClaims{
-        Subject:   user.Email,
-        ExpiresAt: expirationTime.Unix(),
+    claims := &CustomClaims{
+        User: userClaims,
+        StandardClaims: jwt.StandardClaims{
+            Subject:   user.Email,
+            ExpiresAt: expirationTime.Unix(),
+        },
     }
 
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
