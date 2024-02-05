@@ -14,6 +14,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// TODO: Kullanıcı bilgileri sonradan kaldırılacak. Sadece email gerekli.
 type UserClaims struct {
     Name  string
     Email string

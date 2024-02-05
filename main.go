@@ -44,5 +44,8 @@ func main () {
 	r.GET("/api/products", controllers.ProductGetAll)
 	r.GET("/api/product/:slug", controllers.ProductGetSingle)
 
+	r.GET("/api/basket", controllers.GetBasket)
+	r.POST("/api/basket", controllers.AddBasket)
+
 	r.Run()
 }
