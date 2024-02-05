@@ -48,8 +48,29 @@ func AddBasket(c *gin.Context){
 }
 
 func GetBasket(c *gin.Context){
-	user, _ := c.Get("user")
-	userEmail := user.(models.User).Email
+    user, exists := c.Get("user")
+    if !exists {
+        c.JSON(http.StatusUnauthorized, gin.H{
+            "error": "User not authenticated",
+        })
+        return
+    }
+
+    userModel, ok := user.(models.User)
+    if !ok {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error": "Failed to process user information",
+        })
+        return
+    }
+	userEmail := userModel.Email
+	
+    if !ok {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error": "Failed to process user information",
+        })
+        return
+    }
 	var basket []models.Basket
 	initializers.DB.Where("user_email = ?", userEmail).Find(&basket)
 	c.JSON(http.StatusOK, gin.H{
