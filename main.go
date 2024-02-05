@@ -6,6 +6,7 @@ import (
 	"github.com/sellimenes/shadecom-backend/auth"
 	"github.com/sellimenes/shadecom-backend/controllers"
 	"github.com/sellimenes/shadecom-backend/initializers"
+	"github.com/sellimenes/shadecom-backend/middleware"
 )
 
 func init() {
@@ -44,8 +45,8 @@ func main () {
 	r.GET("/api/products", controllers.ProductGetAll)
 	r.GET("/api/product/:slug", controllers.ProductGetSingle)
 
-	r.GET("/api/basket", controllers.GetBasket)
-	r.POST("/api/basket", controllers.AddBasket)
+	r.GET("/api/basket", middleware.AuthMiddleware(), controllers.GetBasket)
+	r.POST("/api/basket", middleware.AuthMiddleware(), controllers.AddBasket)
 
 	r.Run()
 }

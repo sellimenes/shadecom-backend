@@ -9,17 +9,17 @@ import (
 )
 
 func AddBasket(c *gin.Context){
-	var body struct {
-		ProductID uint
-		Quantity  int
-	}
-	if err := c.ShouldBind(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid request body",
-		})
-		return
-	}
-    user, exists := c.Get("user")
+    var body struct {
+        ProductID uint
+    }
+    if err := c.ShouldBind(&body); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "Invalid request body",
+        })
+        return
+    }
+
+    userEmail, exists := c.Get("userEmail")
     if !exists {
         c.JSON(http.StatusUnauthorized, gin.H{
             "error": "User not authenticated",
@@ -27,28 +27,34 @@ func AddBasket(c *gin.Context){
         return
     }
 
-    userModel, ok := user.(models.User)
+    userEmailStr, ok := userEmail.(string)
     if !ok {
         c.JSON(http.StatusInternalServerError, gin.H{
             "error": "Failed to process user information",
         })
         return
     }
-	userEmail := userModel.Email
-	
-	basket := models.Basket{
-		UserEmail: userEmail,
-		ProductID: body.ProductID,
-		Quantity:  body.Quantity,
-	}
-	initializers.DB.Create(&basket)
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "Product added to basket",
-	})
+    
+    var existingBasket models.Basket
+    if err := initializers.DB.Where("user_email = ? AND product_id = ?", userEmailStr, body.ProductID).First(&existingBasket).Error; err == nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "Product already in basket",
+        })
+        return
+    }
+
+    basket := models.Basket{
+        UserEmail: userEmailStr,
+        ProductID: body.ProductID,
+    }
+    initializers.DB.Create(&basket)
+    c.JSON(http.StatusCreated, gin.H{
+        "message": "Product added to basket",
+    })
 }
 
 func GetBasket(c *gin.Context){
-    user, exists := c.Get("user")
+    userEmail, exists := c.Get("userEmail")
     if !exists {
         c.JSON(http.StatusUnauthorized, gin.H{
             "error": "User not authenticated",
@@ -56,24 +62,17 @@ func GetBasket(c *gin.Context){
         return
     }
 
-    userModel, ok := user.(models.User)
+    userEmailStr, ok := userEmail.(string)
     if !ok {
         c.JSON(http.StatusInternalServerError, gin.H{
             "error": "Failed to process user information",
         })
         return
     }
-	userEmail := userModel.Email
-	
-    if !ok {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": "Failed to process user information",
-        })
-        return
-    }
-	var basket []models.Basket
-	initializers.DB.Where("user_email = ?", userEmail).Find(&basket)
-	c.JSON(http.StatusOK, gin.H{
-		"basket": basket,
-	})
+
+    var basket []models.Basket
+    initializers.DB.Where("user_email = ?", userEmailStr).Preload("Product").Find(&basket)
+    c.JSON(http.StatusOK, gin.H{
+        "basket": basket,
+    })
 }
